@@ -1,15 +1,21 @@
-FROM python:3.6.7
+FROM python:3.7
 
-RUN pip install pipenv
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-COPY . /src/.
 WORKDIR /src/
-RUN pipenv install
-RUN pipenv install --system --deploy
 
-WORKDIR /src/todo_django_app
-RUN python manage.py migrate
+RUN pip install --upgrade pip
+RUN pip install pipenv
+COPY ./Pipfile /src/
+RUN pipenv install --skip-lock --system
 
-EXPOSE 8000:8000
-CMD ["bash", "run.sh"]
+COPY . /src/
+EXPOSE 8000
 
+WORKDIR /src/todo_django_app/
+
+# Run this for no migrations / script
+# CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+ENTRYPOINT ["/src/todo_django_app/run.sh"]
